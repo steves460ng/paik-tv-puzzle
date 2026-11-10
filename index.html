@@ -126,6 +126,18 @@ button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 (() => {
+  // ================= 잭팟 설정 · 이 숫자만 바꾸면 돼요 =================
+  // JACKPOT_FACTOR: 모든 확률에 곱하는 배율 (1 = 아래 값 그대로, 2 = 두 배, 0.5 = 절반)
+  // chance: 숨은 배치 1개가 새 모양 제출 1회에 걸릴 확률
+  // count: 게임 시작·리셋 때 깔리는 개수 / mult: 기본 10점에 곱하는 배수
+  const JACKPOT_FACTOR = 1;
+  const JACKPOT_TIERS = [
+    { mult: 2,  count: 10, chance: 1 / 8 },
+    { mult: 4,  count: 8,  chance: 1 / 20 },
+    { mult: 8,  count: 4,  chance: 1 / 60 },
+    { mult: 10, count: 1,  chance: 1 / 100 }
+  ];
+  // ===================================================================
   // ---------- rules & math ----------
   const DIMS = [[12, 10, 10], [10, 8, 8], [8, 6, 6], [6, 4, 4], [4, 4, 4]]; // w,h,d — even so every centre lands on the grid
   const NAMES = ['XL', 'L', 'M', 'S', 'XS'];
@@ -152,64 +164,27 @@ button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
   }
 
   // ---------- hidden jackpots ----------
-  // Every face-to-face contact in the finished sculpture, named by TV and face. Independent of how the whole thing is turned.
-  function contacts(list) {
-    const out = [];
-    for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
-      let A = list[i], B = list[j]; if (A.id > B.id) [A, B] = [B, A];
-      const ha = half(A.O, DIMS[A.id]), hb = half(B.O, DIMS[B.id]), d = [0, 1, 2].map(k => B.p[k] - A.p[k]);
-      for (let k = 0; k < 3; k++) {
-        if (Math.abs(d[k]) !== ha[k] + hb[k]) continue;
-        if (![0, 1, 2].every(m => m === k || Math.abs(d[m]) < ha[m] + hb[m])) continue;
-        const n = [0, 0, 0]; n[k] = Math.sign(d[k]);
-        out.push({ a: A.id, fa: mtv(A.O, n).join(), b: B.id, fb: mtv(B.O, n.map(v => -v)).join() });
-      }
-    }
-    return out;
+  // Each jackpot is a hidden random set of sculptures, drawn fresh at game start and on reset.
+  // A sculpture belongs to it when hash(jackpot seed + sculpture shape) falls under the tier's chance,
+  // so the same shape always gives the same answer, and the odds equal JACKPOT_TIERS[].chance × JACKPOT_FACTOR exactly.
+  const TIERS = JACKPOT_TIERS.map(t => ({ m: t.mult, n: t.count, p: Math.min(1, t.chance * JACKPOT_FACTOR) }));
+  const CONFIG_ID = JSON.stringify(TIERS);
+  const makeJackpots = () => TIERS.flatMap(t => Array.from({ length: t.n }, () => ({ m: t.m, seed: (Math.random() * 2 ** 32) >>> 0, hit: false })));
+  function roll(seed, shape) { // FNV-1a → 0..1
+    let h = 0x811c9dc5 ^ seed;
+    for (let i = 0; i < shape.length; i++) { h ^= shape.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+    h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13;
+    return (h >>> 0) / 2 ** 32;
   }
-  // Clue types: A = two TVs touch · B = one TV's given face touches another TV · C = exact face to exact face.
-  // Recipes tuned by simulation (60,000 random builds): C ≈ 1/78, C+A or B+B ≈ 1/200, B+B+A ≈ 1/600, C+B ≈ 1/1000 per submission.
-  const TIERS = [
-    { m: 2, n: 10, recipes: [['C']] },
-    { m: 4, n: 8, recipes: [['C', 'A'], ['B', 'B']] },
-    { m: 8, n: 4, recipes: [['B', 'B', 'A']] },
-    { m: 10, n: 1, recipes: [['C', 'B']] }
-  ];
-  const FACES = Object.keys(FACE);
-  const rint = n => Math.floor(Math.random() * n);
-  function makeJackpots() {
-    const out = [], keys = new Set();
-    for (const tier of TIERS) {
-      let made = 0;
-      while (made < tier.n) {
-        const recipe = tier.recipes[rint(tier.recipes.length)], used = new Set();
-        const atoms = recipe.map(t => {
-          let a, b; do { a = rint(5); b = rint(5); } while (a === b || used.has(Math.min(a, b) + '-' + Math.max(a, b)));
-          used.add(Math.min(a, b) + '-' + Math.max(a, b));
-          if (t === 'A') return { t, a: Math.min(a, b), b: Math.max(a, b) };
-          if (t === 'B') return { t, a, fa: FACES[rint(6)], b };
-          const lo = Math.min(a, b), hi = Math.max(a, b);
-          return { t, a: lo, fa: FACES[rint(6)], b: hi, fb: FACES[rint(6)] };
-        });
-        const key = JSON.stringify(atoms);
-        if (keys.has(key)) continue;
-        keys.add(key); out.push({ m: tier.m, atoms, hit: false }); made++;
-      }
-    }
-    return out;
-  }
-  const atomHit = (at, C) => C.some(c => {
-    if (at.t === 'A') return c.a === at.a && c.b === at.b;
-    if (at.t === 'B') return (c.a === at.a && c.b === at.b && c.fa === at.fa) || (c.b === at.a && c.a === at.b && c.fb === at.fa);
-    return c.a === at.a && c.b === at.b && c.fa === at.fa && c.fb === at.fb;
-  });
+  const tierOf = m => TIERS.find(t => t.m === m);
 
   // ---------- saved progress (this browser only) ----------
   const KEY = 'paik-tv-puzzle-v1';
-  let score = 0, hist = [], jackpots = null;
-  try { const d = JSON.parse(localStorage.getItem(KEY) || 'null'); if (d) { score = d.score || 0; hist = d.hist || []; jackpots = d.jackpots || null; } } catch (e) {}
-  if (!jackpots) jackpots = makeJackpots();
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ score, hist, jackpots })); } catch (e) {} };
+  let score = 0, hist = [], jackpots = null, configId = null;
+  try { const d = JSON.parse(localStorage.getItem(KEY) || 'null'); if (d) { score = d.score || 0; hist = d.hist || []; jackpots = d.jackpots || null; configId = d.configId || null; } } catch (e) {}
+  // new game, older save, or the settings above were edited → draw a fresh set
+  if (!jackpots || configId !== CONFIG_ID || jackpots.some(j => j.seed === undefined)) jackpots = makeJackpots();
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ score, hist, jackpots, configId: CONFIG_ID })); } catch (e) {} };
   save();
 
   // ---------- three.js scene ----------
@@ -388,8 +363,7 @@ button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
     if (hist.includes(s)) { score -= 5; flash('bad', 'UNCORRECT', '', '이미 만든 모양이에요  −5', 1300); save(); ui(); return; }
     hist.push(s);
     // highest open jackpot this sculpture satisfies
-    const C = contacts(placed);
-    const win = jackpots.filter(j => !j.hit && j.atoms.every(a => atomHit(a, C))).sort((a, b) => b.m - a.m)[0];
+    const win = jackpots.filter(j => !j.hit && roll(j.seed, s) < tierOf(j.m).p).sort((a, b) => b.m - a.m)[0];
     let wait = 900;
     if (win) {
       win.hit = true;
