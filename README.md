@@ -8,6 +8,23 @@ A puzzle and memory game: turn five TVs of different sizes and join them face to
 
 ![The game while attaching a TV. A see-through TV with a green outline shows where it will go](docs/screenshots/build-en.jpg)
 
+## Install as an app (play offline)
+
+Paik TV Puzzle is a PWA. Once installed, it opens from your home screen like an app and plays **without an internet connection**.
+
+| Device | How to install |
+|---|---|
+| **iPhone / iPad** (Safari) | Open the play link → tap the **Share** button → **Add to Home Screen** → **Add** |
+| **Android** (Chrome) | Open the play link → tap **Install app** when it pops up, or **⋮ menu → Install app** (older versions: **Add to Home screen**) |
+| **Windows / Mac** (Chrome, Edge) | Open the play link → click the **install icon** at the right end of the address bar, or **⋮ menu → Cast, save and share → Install page as app** |
+| **Mac** (Safari 17+) | Open the play link → **File → Add to Dock** |
+
+**Before you go offline**, open the game once while connected. It saves itself on your device on that first visit, and after that it opens offline too.
+
+- Updates: when you open the app while online, it picks up the latest version by itself.
+- Score and history are kept in the installed app. The installed app and the browser tab keep separate records on iPhone; on other devices they usually share them.
+- To uninstall, remove it the way you remove any other app (long-press the icon → Remove).
+
 ## Goal
 
 Build and submit a **new shape** every time. Submitting a shape you already made costs points. Your past shapes are never shown, so you have to remember them.
@@ -120,4 +137,6 @@ const JACKPOT_TIERS = [
 
 - Score, history and hidden arrangements are saved in your browser. Reloading does not change the hidden arrangements. On another device or browser you start from 0.
 - Needs a recent browser with WebGL.
+- For developers: three.js and the fonts are bundled in `vendor/` so the game runs offline. If you change any file listed in `sw.js`, bump `CACHE` (for example `paik-tv-v2`) so installed copies update. Changes to `index.html` alone reach players automatically.
+- Fonts: Do Hyeon, IBM Plex Sans KR and VT323 under the SIL Open Font License 1.1. three.js under the MIT License. Licence texts are in `vendor/`.
 - Messages appear in Korean when the device (browser) language is Korean, and in English otherwise.

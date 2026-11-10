@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#0c0b10"/>
+  <g>
+    <!-- antenna -->
+    <path d="M240 112 L196 52 M240 112 L290 56" stroke="#c0c0c0" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <circle cx="196" cy="52" r="9" fill="#c0c0c0"/><circle cx="290" cy="56" r="9" fill="#c0c0c0"/>
+    <!-- top TV: Lissajous -->
+    <rect x="150" y="108" width="180" height="132" rx="18" fill="#6e4527"/>
+    <rect x="166" y="124" width="126" height="100" rx="12" fill="#04160a"/>
+    <path d="M229 174 C 255 140, 275 150, 270 174 C 265 198, 245 208, 229 174 C 213 140, 193 150, 188 174 C 183 198, 203 208, 229 174 Z" stroke="#5cff9d" stroke-width="6" fill="none"/>
+    <circle cx="311" cy="150" r="8" fill="#1b1714"/><circle cx="311" cy="186" r="6" fill="#1b1714"/>
+    <!-- bottom TV: colour bars -->
+    <rect x="92" y="232" width="328" height="206" rx="24" fill="#8a5530"/>
+    <clipPath id="scr"><rect x="116" y="256" width="236" height="158" rx="16"/></clipPath>
+    <g clip-path="url(#scr)">
+      <rect x="116" y="256" width="34" height="158" fill="#c0c0c0"/><rect x="150" y="256" width="34" height="158" fill="#f5d000"/>
+      <rect x="184" y="256" width="34" height="158" fill="#3fd0e0"/><rect x="218" y="256" width="34" height="158" fill="#39e07a"/>
+      <rect x="252" y="256" width="34" height="158" fill="#d040c0"/><rect x="286" y="256" width="34" height="158" fill="#ff4466"/>
+      <rect x="320" y="256" width="32" height="158" fill="#2040d0"/>
+    </g>
+    <circle cx="386" cy="292" r="15" fill="#1b1714"/><path d="M386 292 L396 283" stroke="#c9b48a" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="386" cy="340" r="11" fill="#1b1714"/>
+    <rect x="370" y="372" width="32" height="5" rx="2" fill="#2a1c12"/><rect x="370" y="384" width="32" height="5" rx="2" fill="#2a1c12"/><rect x="370" y="396" width="32" height="5" rx="2" fill="#2a1c12"/>
+    <rect x="120" y="438" width="40" height="12" rx="4" fill="#1b1714"/><rect x="352" y="438" width="40" height="12" rx="4" fill="#1b1714"/>
+  </g></svg>
