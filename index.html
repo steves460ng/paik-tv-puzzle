@@ -72,6 +72,22 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(28px, 5vw, 
 .row .correct { background: var(--good); color: #06180d; border-color: var(--good); font-family: var(--crt); font-size: 26px; font-weight: 400; letter-spacing: .08em; padding: 4px 16px; flex: 2 1 160px; }
 .row .warn { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 50%, transparent); }
 button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+/* jackpot */
+.fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.flash em { font-family: var(--crt); font-style: normal; font-size: clamp(64px, 16vw, 150px); line-height: .9; color: var(--yellow); text-shadow: 0 0 30px rgba(245, 208, 0, .7); }
+.flash em:empty { display: none; }
+.flash.win strong { color: var(--cyan); }
+.flash.win.t10 strong { color: var(--yellow); }
+.flash.win.t10 em { color: #fff; text-shadow: 0 0 18px var(--yellow), 0 0 50px #ff4466; }
+.flash.show.win em { animation: pop .5s cubic-bezier(.2, 1.6, .4, 1) both; }
+@keyframes pop { from { transform: scale(.3); } to { transform: scale(1); } }
+.jp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+.jp > span:first-child { font-weight: 600; letter-spacing: .08em; }
+.jp b { font-family: var(--crt); font-weight: 400; font-size: 20px; color: var(--text); margin-right: 3px; }
+.jp .top b { color: var(--yellow); }
+.jp .gone { opacity: .35; }
+@media (prefers-reduced-motion: reduce) { .flash.show.win em { animation: none; } }
 </style>
 
 <div class="wrap">
@@ -84,9 +100,12 @@ button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
     <canvas id="cv" aria-label="TV 조형물을 만드는 3D 작업대"></canvas>
     <div class="hud l"><small>SCORE</small><b id="score">0</b></div>
     <div class="hud r"><small>만든 모양</small><b id="shapes">0</b></div>
-    <div class="flash" id="flash"><strong id="flashT">CORRECT</strong><span id="flashS"></span></div>
+    <canvas class="fx" id="fx" aria-hidden="true"></canvas>
+    <div class="flash" id="flash"><strong id="flashT">CORRECT</strong><em id="flashM"></em><span id="flashS"></span></div>
     <div class="status" id="status"></div>
   </div>
+
+  <div class="jp" id="jp" aria-label="남은 숨은 잭팟"></div>
 
   <div class="tray" id="tray"></div>
 
@@ -132,11 +151,66 @@ button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
     return best;
   }
 
+  // ---------- hidden jackpots ----------
+  // Every face-to-face contact in the finished sculpture, named by TV and face. Independent of how the whole thing is turned.
+  function contacts(list) {
+    const out = [];
+    for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+      let A = list[i], B = list[j]; if (A.id > B.id) [A, B] = [B, A];
+      const ha = half(A.O, DIMS[A.id]), hb = half(B.O, DIMS[B.id]), d = [0, 1, 2].map(k => B.p[k] - A.p[k]);
+      for (let k = 0; k < 3; k++) {
+        if (Math.abs(d[k]) !== ha[k] + hb[k]) continue;
+        if (![0, 1, 2].every(m => m === k || Math.abs(d[m]) < ha[m] + hb[m])) continue;
+        const n = [0, 0, 0]; n[k] = Math.sign(d[k]);
+        out.push({ a: A.id, fa: mtv(A.O, n).join(), b: B.id, fb: mtv(B.O, n.map(v => -v)).join() });
+      }
+    }
+    return out;
+  }
+  // Clue types: A = two TVs touch · B = one TV's given face touches another TV · C = exact face to exact face.
+  // Recipes tuned by simulation (60,000 random builds): C ≈ 1/78, C+A or B+B ≈ 1/200, B+B+A ≈ 1/600, C+B ≈ 1/1000 per submission.
+  const TIERS = [
+    { m: 2, n: 10, recipes: [['C']] },
+    { m: 4, n: 8, recipes: [['C', 'A'], ['B', 'B']] },
+    { m: 8, n: 4, recipes: [['B', 'B', 'A']] },
+    { m: 10, n: 1, recipes: [['C', 'B']] }
+  ];
+  const FACES = Object.keys(FACE);
+  const rint = n => Math.floor(Math.random() * n);
+  function makeJackpots() {
+    const out = [], keys = new Set();
+    for (const tier of TIERS) {
+      let made = 0;
+      while (made < tier.n) {
+        const recipe = tier.recipes[rint(tier.recipes.length)], used = new Set();
+        const atoms = recipe.map(t => {
+          let a, b; do { a = rint(5); b = rint(5); } while (a === b || used.has(Math.min(a, b) + '-' + Math.max(a, b)));
+          used.add(Math.min(a, b) + '-' + Math.max(a, b));
+          if (t === 'A') return { t, a: Math.min(a, b), b: Math.max(a, b) };
+          if (t === 'B') return { t, a, fa: FACES[rint(6)], b };
+          const lo = Math.min(a, b), hi = Math.max(a, b);
+          return { t, a: lo, fa: FACES[rint(6)], b: hi, fb: FACES[rint(6)] };
+        });
+        const key = JSON.stringify(atoms);
+        if (keys.has(key)) continue;
+        keys.add(key); out.push({ m: tier.m, atoms, hit: false }); made++;
+      }
+    }
+    return out;
+  }
+  const atomHit = (at, C) => C.some(c => {
+    if (at.t === 'A') return c.a === at.a && c.b === at.b;
+    if (at.t === 'B') return (c.a === at.a && c.b === at.b && c.fa === at.fa) || (c.b === at.a && c.a === at.b && c.fb === at.fa);
+    return c.a === at.a && c.b === at.b && c.fa === at.fa && c.fb === at.fb;
+  });
+
   // ---------- saved progress (this browser only) ----------
   const KEY = 'paik-tv-puzzle-v1';
-  let score = 0, hist = [];
-  try { const d = JSON.parse(localStorage.getItem(KEY) || 'null'); if (d) { score = d.score || 0; hist = d.hist || []; } } catch (e) {}
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ score, hist })); } catch (e) {} };
+  let score = 0, hist = [], jackpots = null;
+  try { const d = JSON.parse(localStorage.getItem(KEY) || 'null'); if (d) { score = d.score || 0; hist = d.hist || []; jackpots = d.jackpots || null; } } catch (e) {}
+  if (!jackpots) jackpots = makeJackpots();
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ score, hist, jackpots })); } catch (e) {} };
+  save();
 
   // ---------- three.js scene ----------
   const cv = document.getElementById('cv');
@@ -270,19 +344,65 @@ button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
     placed.forEach(q => scene.remove(q.mesh)); placed = []; target = null; select(0);
   }
 
-  let flashTimer;
-  function flash(ok, title, sub) {
-    const f = $('flash'); f.className = 'flash show ' + (ok ? 'good' : 'bad');
-    $('flashT').textContent = title; $('flashS').textContent = sub;
-    clearTimeout(flashTimer); flashTimer = setTimeout(() => f.classList.remove('show'), 1300);
+  let flashTimer, busy = false;
+  function flash(kind, title, big, sub, ms) {
+    const f = $('flash'); f.className = 'flash show ' + kind;
+    $('flashT').textContent = title; $('flashM').textContent = big; $('flashS').textContent = sub;
+    clearTimeout(flashTimer); flashTimer = setTimeout(() => f.classList.remove('show'), ms);
+  }
+
+  // ---------- fireworks ----------
+  const fx = $('fx'), fg = fx.getContext('2d');
+  const sparks = [], shells = [];
+  const FX_COL = ['#f5d000', '#3fd0e0', '#39e07a', '#d040c0', '#ff4466', '#ffffff', '#c0c0c0'];
+  function fireworks(m) {
+    if (reduce) return;
+    const count = { 2: 3, 4: 6, 8: 10, 10: 24 }[m];
+    for (let i = 0; i < count; i++) shells.push({ at: performance.now() + i * (m === 10 ? 130 : 180), x: .15 + Math.random() * .7, y: .15 + Math.random() * .4, big: m >= 8 });
+  }
+  function drawFx(now) {
+    const r = fx.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+    if (fx.width !== Math.round(r.width * dpr)) { fx.width = Math.round(r.width * dpr); fx.height = Math.round(r.height * dpr); }
+    const W = fx.width, H = fx.height;
+    for (let i = shells.length - 1; i >= 0; i--) {
+      const s = shells[i]; if (now < s.at) continue; shells.splice(i, 1);
+      const col = FX_COL[Math.floor(Math.random() * FX_COL.length)], n = s.big ? 90 : 55, sp = (s.big ? 7 : 5) * dpr;
+      for (let k = 0; k < n; k++) { const a = Math.random() * Math.PI * 2, v = sp * (.35 + Math.random() * .65); sparks.push({ x: s.x * W, y: s.y * H, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 1, col: Math.random() < .2 ? '#ffffff' : col }); }
+    }
+    fg.clearRect(0, 0, W, H);
+    if (!sparks.length) return;
+    fg.globalCompositeOperation = 'lighter';
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const p = sparks[i];
+      p.x += p.vx; p.y += p.vy; p.vx *= .965; p.vy = p.vy * .965 + .09 * dpr; p.life -= .014;
+      if (p.life <= 0) { sparks.splice(i, 1); continue; }
+      fg.globalAlpha = p.life; fg.fillStyle = p.col;
+      fg.beginPath(); fg.arc(p.x, p.y, 2.2 * dpr * (.5 + p.life * .5), 0, 7); fg.fill();
+    }
+    fg.globalAlpha = 1; fg.globalCompositeOperation = 'source-over';
   }
 
   function submit() {
-    if (placed.length < 5) return;
+    if (placed.length < 5 || busy) return;
     const s = signature(placed);
-    if (hist.includes(s)) { score -= 5; flash(false, 'UNCORRECT', '이미 만든 모양이에요  −5'); }
-    else { score += 10; hist.push(s); flash(true, 'CORRECT', `새 모양 #${hist.length}  +10`); setTimeout(clearBoard, 900); }
-    save(); ui();
+    if (hist.includes(s)) { score -= 5; flash('bad', 'UNCORRECT', '', '이미 만든 모양이에요  −5', 1300); save(); ui(); return; }
+    hist.push(s);
+    // highest open jackpot this sculpture satisfies
+    const C = contacts(placed);
+    const win = jackpots.filter(j => !j.hit && j.atoms.every(a => atomHit(a, C))).sort((a, b) => b.m - a.m)[0];
+    let wait = 900;
+    if (win) {
+      win.hit = true;
+      const gain = 10 * win.m; score += gain;
+      wait = win.m === 10 ? 3400 : 2300;
+      flash('good win t' + win.m, win.m === 10 ? 'JACKPOT ×10' : `×${win.m} 보너스`, `+${gain}`, `새 모양 #${hist.length} · 숨은 배치를 찾았어요!`, wait);
+      fireworks(win.m);
+    } else {
+      score += 10;
+      flash('good', 'CORRECT', '', `새 모양 #${hist.length}  +10`, 1300);
+    }
+    busy = true; save(); ui();
+    setTimeout(() => { busy = false; clearBoard(); }, wait);
   }
 
   let resetArmed = false, resetTimer;
@@ -290,11 +410,15 @@ button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
     const b = $('reset');
     if (!resetArmed) { resetArmed = true; b.textContent = '정말 리셋? 한 번 더'; resetTimer = setTimeout(() => { resetArmed = false; b.textContent = '리셋'; }, 3000); return; }
     clearTimeout(resetTimer); resetArmed = false; b.textContent = '리셋';
-    score = 0; hist = []; save(); clearBoard();
+    score = 0; hist = []; jackpots = makeJackpots(); save(); clearBoard();
   }
 
   function ui() {
     $('score').textContent = score; $('shapes').textContent = hist.length;
+    $('jp').innerHTML = '<span>남은 숨은 배치</span>' + TIERS.map(t => {
+      const left = jackpots.filter(j => j.m === t.m && !j.hit).length;
+      return `<span class="${t.m === 10 ? 'top' : ''} ${left ? '' : 'gone'}"><b>${left}</b>${t.m === 10 ? '잭팟 ×10' : '×' + t.m}</span>`;
+    }).join('');
     DIMS.forEach((_, i) => { const b = $('tv' + i); b.classList.toggle('done', placed.some(q => q.id === i)); b.classList.toggle('on', sel === i); });
     const st = $('status');
     if (placed.length === 5) st.textContent = '5대 완성! CORRECT를 눌러 제출하세요. 마음에 안 들면 되돌리기.';
@@ -308,7 +432,7 @@ button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
     $('rotY').disabled = $('rotX').disabled = sel === null;
     $('undo').disabled = !placed.length;
     $('clear').disabled = !placed.length;
-    $('correct').disabled = placed.length < 5;
+    $('correct').disabled = placed.length < 5 || busy;
   }
 
   $('rotY').addEventListener('click', () => rotate(RY));
@@ -352,6 +476,7 @@ button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
     focus.set(0, 0, 0); pts.forEach(p => focus.add(p)); if (pts.length) focus.divideScalar(pts.length);
     controls.target.lerp(focus, .06); controls.update();
     renderer.render(scene, camera);
+    drawFx(now);
     requestAnimationFrame(loop);
   }
   resize(); select(0); ui(); requestAnimationFrame(loop);
