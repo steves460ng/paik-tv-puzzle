@@ -1,79 +1,91 @@
-# 백남준 TV 퍼즐
+**English** | [한국어](README.ko.md)
 
-크기가 다른 TV 5대를 돌리고 면끼리 붙여 나만의 TV 조형물을 만드는 퍼즐 + 기억력 게임입니다. 백남준의 TV 조각 작업에 대한 오마주예요.
+# Paik TV Puzzle
 
-**플레이:** https://steves460ng.github.io/paik-tv-puzzle/
+A puzzle and memory game: turn five TVs of different sizes and join them face to face to build your own TV sculpture. An homage to Nam June Paik's TV sculptures.
 
-## 목표
+**Play:** https://steves460ng.github.io/paik-tv-puzzle/
 
-매번 **새로운 모양**의 조형물을 만들어 제출하세요. 이미 만든 모양을 다시 내면 감점됩니다. 지금까지 낸 모양은 보여 주지 않으니 기억해야 해요.
+![The game while attaching a TV. A see-through TV with a green outline shows where it will go](docs/screenshots/build-en.jpg)
 
-## 화면 구성
+## Goal
 
-- **좌측 상단 SCORE**: 현재 점수
-- **우측 상단 만든 모양**: 지금까지 인정받은 서로 다른 모양의 개수
-- **아래 TV 목록**: XL · L · M · S · XS 다섯 대 (붙인 TV는 ✓ 표시)
+Build and submit a **new shape** every time. Submitting a shape you already made costs points. Your past shapes are never shown, so you have to remember them.
 
-## TV의 여섯 면
+## Screen
 
-면마다 생김새가 달라서 어느 쪽이 어디를 향하는지 알 수 있어요.
+- **SCORE (top left)**: your current score
+- **SHAPES (top right)**: how many different shapes you have had accepted
+- **TV list (bottom)**: five TVs, XL · L · M · S · XS (a ✓ marks the ones already joined)
 
-| 면 | 생김새 |
+## The six faces of a TV
+
+Each face looks different, so you can always tell which way a TV is facing.
+
+| Face | Looks like |
 |---|---|
-| 화면 | 영상이 나오는 앞면 |
-| 뒤판 | 회색 판에 통풍구와 라벨 |
-| 다이얼면 | 나무 옆면에 손잡이 2개 |
-| 스피커면 | 나무 옆면에 스피커 구멍 |
-| 윗면 | 밝은 나무에 통풍 슬롯 |
-| 밑면 | 어두운 판에 고무발 4개 |
+| Screen | The front, playing video |
+| Back | Grey panel with vents and a label |
+| Dial side | Wooden side with two knobs |
+| Speaker side | Wooden side with speaker holes |
+| Top | Light wood with vent slots |
+| Bottom | Dark panel with four rubber feet |
 
-각 TV 화면에는 서로 다른 영상이 나와요: XL 컬러바, L 노이즈, M 자석 TV, S 달, XS 리사주.
+Each screen plays its own programme: XL color bars, L noise, M Magnet TV, S moon, XS Lissajous.
 
-## 게임 방법
+## How to play
 
-1. **첫 TV 놓기**: TV 목록에서 하나를 고르고 `좌우 회전` · `상하 회전`으로 자세를 정한 뒤 `놓기`를 누릅니다.
-2. **붙일 면 고르기**: 다음 TV를 고르고, 이미 놓인 TV에서 붙일 면을 탭(클릭)합니다. 붙을 자리에 반투명 TV가 나타나요.
-3. **맞닿을 면 고르기**: 회전 버튼으로 새 TV의 어느 면이 맞닿을지 정합니다. 아래 안내줄에 "맞닿는 면"이 표시돼요.
-4. **붙이기**: 테두리가 초록색이면 `붙이기`를 누릅니다. 빨간색이면 다른 TV와 겹친다는 뜻이라 붙일 수 없어요.
-5. **제출**: 5대를 모두 붙이면 `CORRECT`를 누릅니다.
+1. **Place the first TV**: pick one from the TV list, set its pose with `Turn sideways` and `Tilt up/down`, then press `Place`.
+2. **Pick where it goes**: pick the next TV, then tap (or click) a face on a TV that is already placed. A see-through TV appears where it will attach.
+3. **Pick which face touches**: use the turn buttons to choose which face of the new TV touches. The hint line at the bottom shows the "Touching face".
+4. **Attach**: when the outline is green, press `Attach`. Red means it would overlap another TV, so it can't go there.
+5. **Submit**: once all five are joined, press `CORRECT`.
 
-한 TV에 여러 TV를 붙여 가지를 쳐도 됩니다. TV 5대는 모두 이어져 있어야 해요.
+You can attach several TVs to one TV and let the sculpture branch out. All five TVs must be connected.
 
-## 점수
+## Scoring
 
-| 결과 | 점수 |
+| Result | Points |
 |---|---|
-| **CORRECT**: 처음 만든 모양 | +10 |
-| **UNCORRECT**: 이미 만든 모양 | −5 |
+| **CORRECT**: a shape you haven't made before | +10 |
+| **UNCORRECT**: a shape you already made | −5 |
 
-CORRECT가 나오면 판이 비워지고 다음 판이 시작돼요. UNCORRECT가 나오면 판이 그대로 남아 있어서 고쳐서 다시 낼 수 있어요.
+After CORRECT the board clears and the next round starts. After UNCORRECT the board stays as it is, so you can change it and try again.
 
-## 숨은 배치 (잭팟)
+### What counts as the same shape
 
-게임을 처음 시작할 때와 리셋할 때마다 **숨은 배치 23개**가 무작위로 정해져요. 숨은 배치마다 그에 해당하는 조형물들이 무작위로 정해지고, 어떤 모양인지는 화면에 나오지 않아요.
+- The **finished shape** is judged, not the order of button presses.
+- If **turning the whole sculpture** makes two shapes match, they are the same shape.
+- A **mirror image** counts as a different shape.
 
-새 모양으로 CORRECT를 냈을 때 그 모양이 숨은 배치에 해당하면 기본 10점 대신 배수 점수를 받고 폭죽이 터져요. 같은 모양은 같은 게임 안에서 항상 같은 결과를 내요.
+## Hidden arrangements (jackpots)
 
-| 등급 | 개수 | 보상 | 당첨 확률 (숨은 배치 1개, 제출 1회 기준) |
+When a game starts, and on every reset, **23 hidden arrangements** are drawn at random. Each one secretly matches a random set of sculptures, and none of them are shown on screen.
+
+When you submit a new shape with CORRECT and it matches a hidden arrangement, you get a multiplied score instead of the usual 10 points, with fireworks. Within one game, the same shape always gives the same result.
+
+| Tier | Count | Reward | Chance (per hidden arrangement, per submission) |
 |---|---|---|---|
-| ×2 | 10 | +20 | 약 1/27 |
-| ×4 | 8 | +40 | 약 1/67 |
+| ×2 | 10 | +20 | about 1/27 |
+| ×4 | 8 | +40 | about 1/67 |
 | ×8 | 4 | +80 | 1/200 |
-| **잭팟 ×10** | 1 | **+100** | 약 1/333 |
+| **Jackpot ×10** | 1 | **+100** | about 1/333 |
 
-현재 배율(`JACKPOT_FACTOR`)은 0.3이에요. 게임 2만 판 시뮬레이션 기준으로 첫 10회 제출 중 약 38%에서 보너스가 나오고, 잭팟은 100회 안에 만날 확률이 약 26%예요.
+The current factor (`JACKPOT_FACTOR`) is 0.3. In a simulation of 20,000 games, about 38% of the first 10 submissions earned a bonus, and about 26% of players hit the jackpot within 100 submissions.
 
-- 한 번 제출에 여러 개가 걸리면 가장 높은 배수 하나만 받아요.
-- 찾은 숨은 배치는 사라져요. 남은 개수는 작업대 아래에 표시돼요.
-- UNCORRECT(이미 만든 모양)에는 잭팟이 적용되지 않아요.
-- 게임 초반에는 숨은 배치가 많이 깔려 있어서 자주 걸리고, 찾을수록 점점 드물어져요.
+- If one submission matches several, you get only the highest multiplier.
+- A found arrangement is used up. The number left is shown under the workbench.
+- UNCORRECT (a shape you already made) never wins a jackpot.
+- Early in a game many arrangements are still hidden, so bonuses come often; they get rarer as you find them.
 
-### 확률 조정
+![The Jackpot ×10 screen, with fireworks and a large +100](docs/screenshots/jackpot-en.jpg)
 
-`index.html`의 스크립트 맨 위 **잭팟 설정** 블록에서 숫자만 바꾸면 돼요.
+### Tuning the odds
+
+Change the numbers in the **jackpot settings** block at the top of the script in `index.html`.
 
 ```js
-const JACKPOT_FACTOR = 0.3;          // 모든 확률에 곱하는 배율 (2 = 두 배, 0.5 = 절반)
+const JACKPOT_FACTOR = 0.3;          // multiplies every chance (2 = double, 0.5 = half)
 const JACKPOT_TIERS = [
   { mult: 2,  count: 10, chance: 1 / 8 },
   { mult: 4,  count: 8,  chance: 1 / 20 },
@@ -82,28 +94,30 @@ const JACKPOT_TIERS = [
 ];
 ```
 
-- `chance`: 숨은 배치 1개가 새 모양 제출 1회에 걸릴 확률
-- `count`: 깔리는 개수 / `mult`: 기본 10점에 곱하는 배수
-- 설정을 바꾸면 다음 접속 때 숨은 배치를 새로 뽑아요. 점수와 기록은 유지돼요.
+- `chance`: the chance that one hidden arrangement matches one new submission
+- `count`: how many are drawn / `mult`: what the base 10 points are multiplied by
+- After you change the settings, new hidden arrangements are drawn on the next visit. Score and history are kept.
 
-## 버튼
+## Buttons
 
-| 버튼 | 기능 |
+| Button | What it does |
 |---|---|
-| 좌우 회전 / 상하 회전 | 고른 TV를 90도씩 돌림 |
-| 놓기 / 붙이기 | TV를 그 자리에 고정 |
-| 되돌리기 | 마지막에 붙인 TV를 떼어냄 |
-| 판 비우기 | 지금 판의 TV를 모두 치움 (점수 유지) |
-| 리셋 | 점수와 기록을 모두 0으로 하고 숨은 배치를 새로 뽑음 (두 번 눌러야 작동) |
+| Turn sideways / Tilt up/down | Turns the selected TV 90° |
+| Place / Attach | Fixes the TV in place |
+| Undo | Removes the last TV you joined |
+| Clear board | Removes all TVs from this round (score is kept) |
+| Reset | Sets score and history to 0 and draws new hidden arrangements (press twice) |
 
-## 조작
+## Controls
 
-- **시점 돌리기**: 빈 곳을 드래그 (모바일은 한 손가락)
-- **확대·축소**: 마우스 휠 또는 두 손가락 핀치
-- **면 고르기**: 짧게 탭 또는 클릭
+- **Orbit the view**: drag on empty space (one finger on mobile)
+- **Zoom**: mouse wheel or two-finger pinch
+- **Pick a face**: short tap or click
 
-## 참고
+<img src="docs/screenshots/mobile-en.jpg" alt="All five TVs joined, on a phone screen" width="320">
 
-- 점수, 기록, 숨은 배치는 사용하는 브라우저에 저장돼요. 새로고침해도 숨은 배치는 바뀌지 않아요. 다른 기기나 브라우저에서는 0점부터 시작합니다.
-- WebGL을 지원하는 최신 브라우저가 필요해요.
-- 기기(브라우저) 언어가 한국어면 한국어로, 그 밖의 언어면 영어로 안내 문구가 나와요.
+## Notes
+
+- Score, history and hidden arrangements are saved in your browser. Reloading does not change the hidden arrangements. On another device or browser you start from 0.
+- Needs a recent browser with WebGL.
+- Messages appear in Korean when the device (browser) language is Korean, and in English otherwise.
